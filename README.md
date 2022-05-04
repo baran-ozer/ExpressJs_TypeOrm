@@ -1,2 +1,7 @@
-# expressjs_typeorm
-expressjs and typeorm example
+# expressjs and typeorm example
+
+Steps to run this project:
+
+1. Run `npm i` command
+2. Setup database settings inside `data-source.ts` file
+3. Run `npm start` command
