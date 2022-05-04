@@ -1,4 +1,4 @@
-# expressjs and typeorm example
+# express and typeorm example
 
 Steps to run this project:
 
