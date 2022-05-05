@@ -4,12 +4,15 @@ import { Request, Response } from "express";
 import { AppDataSource } from "./data-source";
 import { Routes } from "./routes";
 import { User } from "./entity/User";
+import * as morgan from "morgan"
 
 AppDataSource.initialize()
   .then(async () => {
     // create express app
     const app = express();
     app.use(bodyParser.json());
+    app.use(morgan("dev"))
+    app.use(express.static("./public")); // serving static files from public folder
 
     // register express routes from defined application routes
     Routes.forEach((route) => {
@@ -24,11 +27,6 @@ AppDataSource.initialize()
         }
       });
     });
-
-    // setup express app here
-    app.use(express.static("./public")); // serving static files from public folder
-
-    // ...
 
     // start express server
     app.listen(4000);

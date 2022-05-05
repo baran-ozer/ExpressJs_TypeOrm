@@ -10,7 +10,8 @@ export class UserController {
   }
 
   async one(request: Request, response: Response, next: NextFunction) {
-    let user = await this.userRepository.findOneBy({ id: request.params.id });
+    let userId = parseInt(request.params.id)
+    let user = userId ? await this.userRepository.findOneBy({ id: userId }) : undefined;
     if (user) {
       return user;
     }
@@ -22,7 +23,8 @@ export class UserController {
   }
 
   async remove(request: Request, response: Response, next: NextFunction) {
-    let userToRemove = await this.userRepository.findOneBy({ id: request.params.id });
+    let userId = parseInt(request.params.id)
+    let userToRemove = userId ? await this.userRepository.findOneBy({ id: userId }) : undefined;
     await this.userRepository.remove(userToRemove);
     response.status(200).json({ message: "User removed" });
   }
