@@ -1,14 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { AppDataSource } from "../data-source";
 import { Order } from "../entity/Order";
 import { User } from "../entity/User";
 
 export class OrderController {
-  orderRepository = AppDataSource.getRepository(Order);
-  userRepository = AppDataSource.getRepository(User);
-
   async all(request: Request, response: Response, next: NextFunction) {
-    const orders = await this.orderRepository.find({
+    const orders = await Order.find({
       relations: {
         user: true,
       },
@@ -18,7 +14,7 @@ export class OrderController {
 
   async one(request: Request, response: Response, next: NextFunction) {
     try {
-      return await this.orderRepository.findOneByOrFail({ id: parseInt(request.params.id) });
+      return await Order.findOneByOrFail({ id: parseInt(request.params.id) });
     } catch (error) {
       response.status(404).send(error);
     }
@@ -26,13 +22,16 @@ export class OrderController {
 
   async save(request: Request, response: Response, next: NextFunction) {
     try {
-      const user: User = await this.userRepository.findOneByOrFail({
-        id: parseInt(request.body.userId),
+      const { userId, quantity } = request.body;
+      const user: User = await User.findOneByOrFail({
+        id: parseInt(userId),
       });
-      const order = new Order();
-      order.quantity = request.body.quantity;
-      order.user = user;
-      return AppDataSource.manager.save(order);
+      const order = Order.create({
+        quantity: quantity,
+        user: user,
+      });
+      await order.save();
+      return order;
     } catch (error) {
       response.status(500).send(error);
     }
@@ -40,11 +39,15 @@ export class OrderController {
 
   async userOrders(request: Request, response: Response, next: NextFunction) {
     try {
-      const user: User = await this.userRepository.findOneByOrFail({
+      const user_obj = await User.findOneByOrFail({
         id: parseInt(request.params.userId),
       });
-      const orders = await this.orderRepository.find({
-        where: { user: user },
+      const orders = await Order.find({
+        where: {
+          user: {
+            id: user_obj.id,
+          },
+        },
         relations: {
           user: true,
         },

@@ -1,17 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import { AppDataSource } from "../data-source";
 import { User } from "../entity/User";
 
 export class UserController {
-  userRepository = AppDataSource.getRepository(User);
-
   async all(request: Request, response: Response, next: NextFunction) {
-    return this.userRepository.find();
+    return User.find();
   }
 
   async one(request: Request, response: Response, next: NextFunction) {
-    let userId = parseInt(request.params.id)
-    let user = userId ? await this.userRepository.findOneBy({ id: userId }) : undefined;
+    let userId = parseInt(request.params.id);
+    let user = userId ? await User.findOneBy({ id: userId }) : undefined;
     if (user) {
       return user;
     }
@@ -19,13 +16,13 @@ export class UserController {
   }
 
   async save(request: Request, response: Response, next: NextFunction) {
-    return this.userRepository.save(request.body);
+    return User.save(request.body);
   }
 
   async remove(request: Request, response: Response, next: NextFunction) {
-    let userId = parseInt(request.params.id)
-    let userToRemove = userId ? await this.userRepository.findOneBy({ id: userId }) : undefined;
-    await this.userRepository.remove(userToRemove);
+    let userId = parseInt(request.params.id);
+    let userToRemove = userId ? await User.findOneBy({ id: userId }) : undefined;
+    await User.remove(userToRemove);
     response.status(200).json({ message: "User removed" });
   }
 }

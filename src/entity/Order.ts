@@ -1,9 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  ManyToMany,
+  JoinTable,
+  BaseEntity,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { Product } from "./Product";
 import { User } from "./User";
 
 @Entity()
-export class Order {
+export class Order extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -14,6 +24,12 @@ export class Order {
   @Column()
   quantity: number;
 
-  @ManyToOne(() => User, (user) => user.orders) // note: we need create orders property in the User class
+  @ManyToOne(() => User, (user) => user.orders, { onDelete: "CASCADE" }) // note: we need create orders property in the User class
   user: User;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }
