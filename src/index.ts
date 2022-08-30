@@ -5,11 +5,20 @@ import { AppDataSource } from "./data-source";
 import { Routes } from "./routes";
 import { User } from "./entity/User";
 import * as morgan from "morgan";
+import rateLimit from "express-rate-limit";
+
+const limiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 60, // Limit each IP to 60 requests per `window` (here, 60 per 5 minutes)
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 AppDataSource.initialize()
   .then(async () => {
     // create express app
     const app = express();
+    app.use(limiter);
     app.use(bodyParser.json());
     app.use(morgan("dev"));
     app.use(express.static("./public")); // serving static files from public folder
@@ -19,9 +28,7 @@ AppDataSource.initialize()
       (app as any)[route.method](route.route, (req: Request, res: Response, next: Function) => {
         const result = new (route.controller as any)()[route.action](req, res, next);
         if (result instanceof Promise) {
-          result.then((result) =>
-            result !== null && result !== undefined ? res.send(result) : undefined
-          );
+          result.then((result) => (result !== null && result !== undefined ? res.send(result) : undefined));
         } else if (result !== null && result !== undefined) {
           res.json(result);
         }
@@ -63,8 +70,6 @@ AppDataSource.initialize()
         })
       );
     }
-    console.log(
-      "Express server has started on port 4000. Open http://localhost:4000/users to see results"
-    );
+    console.log("Express server has started on port 4000. Open http://localhost:4000/users to see results");
   })
   .catch((error) => console.log(error));
